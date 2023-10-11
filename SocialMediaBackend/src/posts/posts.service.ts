@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from 'src/auth/user.schema';
-import { SchedulerRegistry } from '@nestjs/schedule';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class PostsService {
@@ -14,6 +14,7 @@ export class PostsService {
     @InjectModel(User.name) private userModel: Model<User>,
     private schedulerRegistry: SchedulerRegistry,
   ) {}
+  private readonly logger = new Logger(PostsService.name);
 
   // For Creating Post .
   async createPost(
@@ -23,6 +24,7 @@ export class PostsService {
   ) {
     const post = new this.postModel({
       ...createPostDto,
+      isActive: true,
       email: email,
       imagePath: image.path,
     });
@@ -33,6 +35,32 @@ export class PostsService {
       { new: true },
     );
     return post.save();
+  }
+
+  // For Cron Job
+  @Cron('*/30 * * * * *')
+  async getPosts() {
+    const date_obj = new Date();
+    const date = ('0' + date_obj.getDate()).slice(-2);
+    const month = ('0' + (date_obj.getMonth() + 1)).slice(-2);
+    const hours = date_obj.getHours();
+    const minutes = date_obj.getMinutes();
+    const time = `${date}/${month}/${hours}/${minutes}`;
+    const Postsdata = await this.postModel.findOne({
+      scheduleTime: time,
+    });
+    if (Postsdata != null) {
+      let val = false;
+      if (Postsdata.isActive === true) val = false;
+      else val = true;
+      console.log(val);
+      const result = await this.postModel.findOneAndUpdate(
+        { email: Postsdata.email },
+
+        { isActive: val },
+        { new: true },
+      );
+    }
   }
 
   // Likes Service :-
@@ -124,16 +152,4 @@ export class PostsService {
     const commentsOnPost = await this.postModel.findById(id);
     return commentsOnPost.comments;
   }
-
-  // @Cron('20 * * * * * ')
-  // async createPostAt(
-  //   time,
-  //   createPostDto: CreatePostDto,
-  //   email,
-  //   image: Express.Multer.File,
-  // ) {
-  //   console.log(time);
-  //   return 'Wait';
-  //   this.logger.debug(this.createPost(createPostDto, email, image));
-  // }
 }

@@ -1,6 +1,7 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 
 import { Document, SchemaTypes } from 'mongoose';
+import { Book } from 'src/books/book.schema';
 import { Friends } from 'src/friends/friends.schema';
 import { Posts } from 'src/posts/post.schema';
 
@@ -28,7 +29,10 @@ export class User {
   @Prop({ type: [{ type: SchemaTypes.ObjectId, ref: 'Posts' }] })
   posts: Posts[]; // Reference to the Post schema
 
-  @Prop({ type: [{ type: SchemaTypes.ObjectId, ref: 'Friends' }] })
-  friends: Friends[];
+  @Prop({ type: [{ type: SchemaTypes.ObjectId, ref: 'Book' }] })
+  books: Book[]; // Reference to the Book schema
+
+  @Prop({ type: [{ type: SchemaTypes.ObjectId, ref: 'User' }] })
+  friends: User[]; // Reference Itself .
 }
 export const UserSchema = SchemaFactory.createForClass(User);

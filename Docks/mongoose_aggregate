@@ -1,0 +1,9 @@
+Mongoose Aggregate
+
+Using Match : $match
+
+    let filter = {name :"yash"}
+    const userInfo = await this.userModel.aggregate([
+      { $match: filter }
+    ]);
+    return userInfo;
