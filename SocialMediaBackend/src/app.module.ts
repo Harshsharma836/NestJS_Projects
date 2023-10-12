@@ -7,12 +7,14 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { FriendsModule } from './friends/friends.module';
 import { friendsMiddleware } from './friends/friends.middleware';
+import { BooksModule } from './books/books.module';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     PostsModule,
+    BooksModule,
     MongooseModule.forRoot(
       'mongodb+srv://harsh:1234@netflix.ganq2b0.mongodb.net/?retryWrites=true&w=majority',
     ),

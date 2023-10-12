@@ -1,0 +1,29 @@
+// We can use several methods by using 
+// BookModel.
+
+// Aggregation
+
+    // - Aggregation PipleLunes
+    // - Single purpose AAggregation PipleLunes : count,distinct
+
+// Count :
+// Query.prototype.count()
+const count = await this.bookModel.countDocuments({ userid });
+
+// -----------------------------------------------------------------
+//  aggregation pipeline example contains two stages 
+
+const totalPrice = await this.bookModel.aggregate([
+    {
+      $match: {title : "Fault"}
+    },
+    {
+      $group : {_id : "$title" , totalPrice : {$sum : "$price"}}
+    }
+  ])
+  return totalPrice;
+
+// It will match and find the field title in bookModel and calculate sum of all same title book price.
+// ps : price is a field and sum is a function . and totalPrice is just a key for output
+
+// -----------------------------------------------------------------

@@ -3,15 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseGuards,
   Req,
+  Query,
+  Param,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('books')
@@ -25,18 +23,32 @@ export class BooksController {
     return this.booksService.create(createBookDto, userId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.booksService.findOne(+id);
+  @Get('totalbooks')
+  @UseGuards(AuthGuard)
+  countUserBook(@Req() req) {
+    const userid = req.user.userid;
+    return this.booksService.countUserBook(userid);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.booksService.update(+id, updateBookDto);
+  // Get all book price or by title
+  @Get('allbprice')
+  @UseGuards(AuthGuard)
+  TotalBooksPrice(@Req() req, @Query() parmas) {
+    return this.booksService.TotalBooksPrice(parmas.title);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.booksService.remove(+id);
+  @Get()
+  @UseGuards(AuthGuard)
+  findAll(@Req() req) {
+    const userid = req.user.userid;
+    return this.booksService.findAll(userid);
+  }
+
+  // Testing Purpose
+
+  @Post('transaction')
+  @UseGuards(AuthGuard)
+  transactionStart(@Req() req) {
+    return this.booksService.transcation(req.user.userid);
   }
 }

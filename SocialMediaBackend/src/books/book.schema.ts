@@ -14,6 +14,10 @@ export class Book {
 
   @Prop()
   price: number;
+
+  @Prop({ required: true, index: true })
+  book_id: string;
 }
 
 export const BookSchema = SchemaFactory.createForClass(Book);
+BookSchema.index({ type: 1 }, { unique: true });

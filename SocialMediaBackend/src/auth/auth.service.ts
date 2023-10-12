@@ -3,6 +3,7 @@ import { User } from './user.schema';
 import { Model } from 'mongoose';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +34,9 @@ export class AuthService {
       return 'Email Already Exist , Try Login';
     }
     userData.isActive = true;
+    const { email, password } = userData;
+    const saltPassword = 10;
+    const hash = await bcrypt.hash(password, saltPassword);
     const user = new this.userModel(userData);
     user.save();
     return 'User Is Created , Please Login';

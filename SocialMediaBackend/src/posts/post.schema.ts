@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { QueryTimestampsConfig, now } from 'mongoose';
+import { Date, QueryTimestampsConfig, now } from 'mongoose';
 
 @Schema()
 export class Posts {
@@ -22,14 +22,12 @@ export class Posts {
   @Prop()
   isActive: boolean;
 
-  @Prop({ default: now() })
+  @Prop({ type: Date })
   createdAt: Date;
 
-  @Prop({ default: new Date().toLocaleTimeString() })
-  createdAtTime: string;
-
+  // Format is : oct 12, 2023 11:29:00
   @Prop()
-  scheduleTime: string;
+  scheduleDateAndTime: number;
 
   @Prop()
   comments: [{ By: string; Comment: string }];

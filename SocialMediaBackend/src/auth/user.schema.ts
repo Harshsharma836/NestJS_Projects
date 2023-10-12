@@ -2,7 +2,6 @@ import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 
 import { Document, SchemaTypes } from 'mongoose';
 import { Book } from 'src/books/book.schema';
-import { Friends } from 'src/friends/friends.schema';
 import { Posts } from 'src/posts/post.schema';
 
 export type UserDocument = Document & User;

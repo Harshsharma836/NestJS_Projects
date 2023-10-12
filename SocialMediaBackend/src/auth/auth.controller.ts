@@ -13,7 +13,6 @@ export class AuthController {
 
   @Post('register')
   registerIn(@Body() createAuthDto: CreateAuthDto) {
-    // console.log(createAuthDto);
     return this.authService.registerIn(createAuthDto);
   }
 }

@@ -16,12 +16,16 @@ export class PostsService {
   ) {}
   private readonly logger = new Logger(PostsService.name);
 
-  // For Creating Post .
+  // For Creating Post.
   async createPost(
     createPostDto: CreatePostDto,
     email,
     image: Express.Multer.File,
   ) {
+    // First Create to Date Object .
+    const date = new Date(createPostDto.scheduleDateAndTime).getTime();
+    //createPostDto.scheduleDateAndTime = date.toString();
+    createPostDto.scheduleDateAndTime = date;
     const post = new this.postModel({
       ...createPostDto,
       isActive: true,
@@ -38,33 +42,25 @@ export class PostsService {
   }
 
   // For Cron Job
-  @Cron('*/30 * * * * *')
+  // Cron Run Every Second , 300000 : 5 minutes , 1000 : 1sec
+  @Cron('45 * * * * *')
   async getPosts() {
-    const date_obj = new Date();
-    const date = ('0' + date_obj.getDate()).slice(-2);
-    const month = ('0' + (date_obj.getMonth() + 1)).slice(-2);
-    const hours = date_obj.getHours();
-    const minutes = date_obj.getMinutes();
-    const time = `${date}/${month}/${hours}/${minutes}`;
+    const date_obj = Date.now();
     const Postsdata = await this.postModel.findOne({
-      scheduleTime: time,
+      scheduleDateAndTime: { $gt: date_obj - 300000, $lt: date_obj + 300000 },
+      isActive: true,
     });
     if (Postsdata != null) {
-      let val = false;
-      if (Postsdata.isActive === true) val = false;
-      else val = true;
-      console.log(val);
       const result = await this.postModel.findOneAndUpdate(
         { email: Postsdata.email },
-
-        { isActive: val },
+        { isActive: false },
         { new: true },
       );
+      console.log('updated');
     }
   }
 
   // Likes Service :-
-
   async getAndRemoveLikes(id, email) {
     const Posts = await this.postModel.findById(id);
     let likes = Posts.likes;
