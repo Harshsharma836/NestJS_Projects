@@ -18,7 +18,7 @@ import { EmailModule } from './email/email.module';
     PostsModule,
     BooksModule,
     MongooseModule.forRoot(
-      'mongodb+srv://harsh:1234@netflix.ganq2b0.mongodb.net/?retryWrites=true&w=majority',
+      process.env.MONGO_URL
     ),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot(),
