@@ -1,29 +1,117 @@
-// We can use several methods by using 
-// BookModel.
+// // $in Operator is used to search inside an document array and filter the data based on query.
 
-// Aggregation
+//   // We are taking title as query param
+//   // Controller :
+//   @Get('findbook')
+//   @UseGuards(AuthGuard)
+//   async findBook(@Query('title') title: string) {
+// 	const book = await this.booksService.findBook(title);
+// 	return book;
+//   }
 
-    // - Aggregation PipleLunes
-    // - Single purpose AAggregation PipleLunes : count,distinct
+//   // Services :
+//   async findBook(title){
+// 	let bookByTittle = await this.bookModel.find({"title" : {$in : title} })
+// 	return bookByTittle
+//   }
 
-// Count :
-// Query.prototype.count()
-const count = await this.bookModel.countDocuments({ userid });
+// // ----------------------------------------------------------------------
 
-// -----------------------------------------------------------------
-//  aggregation pipeline example contains two stages 
+// // Aggregation
 
-const totalPrice = await this.bookModel.aggregate([
-    {
-      $match: {title : "Fault"}
-    },
-    {
-      $group : {_id : "$title" , totalPrice : {$sum : "$price"}}
-    }
-  ])
-  return totalPrice;
+// 	// - Aggregation PipeLines
+// 	// - Single purpose AAggregation PipeLines : count,distinct
 
-// It will match and find the field title in bookModel and calculate sum of all same title book price.
-// ps : price is a field and sum is a function . and totalPrice is just a key for output
+// // Count :
+// // Query.prototype.count()
+// const count = await this.bookModel.countDocuments({ userid });
+// return count;
 
-// -----------------------------------------------------------------
+
+// //---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// //  aggregation pipeline example contains two stages
+
+// const totalPrice = await this.bookModel.aggregate([
+// 	{
+//   	$match: {title : "Fault"}
+// 	},
+// 	{
+//   	$group : {_id : "$title" , totalPrice : {$sum : "$price"}}
+// 	}
+//   ])
+//   return totalPrice;
+
+// // It will match and find the field title in bookModel and calculate sum of all same title book price.
+// // ps : price is a field and sum is a function . and totalPrice is just a key for output
+
+
+// //---------------------------------------------------------------------
+
+
+// // Transaction : It help to execute multiple operation (query) in isolation and
+// // undo all operation if one fails.
+
+// 	const session = await this.transactionService.startTransaction();
+// 	try {
+//   	// Perform operations here
+//   	const result = await this.bookModel.find();
+//   	if(_id != undefined){
+//     	let anothereQuery = await this.bookModel.findById(_id);
+//   	}
+//   	// Commit the transaction if everything is good
+//   	await this.transactionService.commitTransaction(session);
+//   	//return result;
+//   	console.log('Transaction successful:', {
+//     	timestamp: new Date(),
+//   	});
+//   	return result;
+ 	 
+// 	} catch (error) {
+//   	// for errorr
+//   	console.log("error")
+//   	// If any query failed above it abort and revert the commands .
+//   	await this.transactionService.abortTransaction(session);
+//   	throw error;
+// 	}
+
+
+
+
+// // This is for Transaction Service
+
+// private session: ClientSession
+//   constructor( @InjectModel(Book.name) private bookModel = Model<Book>) {}
+
+//   async startTransaction(): Promise<any> {
+// 	console.log("Transcation Started")
+// 	this.session = await this.bookModel.db.startSession();
+// 	this.session.startTransaction();
+// 	return this.session;
+//   }
+
+//   async commitTransaction(session): Promise<void> {
+// 	await session.commitTransaction();
+// 	session.endSession();
+//   }
+
+//   async abortTransaction(session): Promise<void> {
+// 	await session.abortTransaction();
+// 	session.endSession();
+//   }

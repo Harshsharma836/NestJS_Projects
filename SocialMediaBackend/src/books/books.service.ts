@@ -5,22 +5,48 @@ import { Book } from './book.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/auth/user.schema';
+import { TransactionService } from './transcation.service';
 
 @Injectable()
 export class BooksService {
   constructor(
     @InjectModel(Book.name) private bookModel = Model<Book>,
     @InjectModel(User.name) private userModel = Model<User>,
+    private transactionService : TransactionService ,
   ) {}
 
+  async transcation(_id) {
+    const session = await this.transactionService.startTransaction();
+    try {
+      // Perform operations here
+      const result = await this.bookModel.find();
+      if(_id != undefined){
+        let anothereQuery = await this.bookModel.findById(_id);
+      }
+      // Commit the transaction if everything is good
+      await this.transactionService.commitTransaction(session);
+      //return result;
+      console.log('Transaction successful:', {
+        timestamp: new Date(),
+      });
+      return result;
+    } catch (error) {
+      // for errorr
+      console.log("error")
+      await this.transactionService.abortTransaction(session);
+      throw error;
+    }
+  }
+
   async create(createBookDto: CreateBookDto, userid) {
+
     createBookDto['userid'] = userid;
     const book = await this.bookModel.create(createBookDto);
     const result = await this.userModel.findByIdAndUpdate(
       { _id: userid },
       { $push: { books: book._id } },
     );
-    const ans = await this.userModel
+    const ans = await this.bookModel
       .findById({ _id: userid })
       .populate('books');
     return 'Book Added';
@@ -30,6 +56,11 @@ export class BooksService {
   async countUserBook(userid) {
     const counts = await this.bookModel.count({ userid });
     return counts;
+  }
+
+  async findBook(title){
+    let bookByTittle = await this.bookModel.find({"title" : {$in : title} })
+    return bookByTittle
   }
 
   // Find Books by Title and Calculate its all sum
@@ -47,24 +78,20 @@ export class BooksService {
   }
 
   // Transaction Testing :
-
-  async transcation(userid) {
-    // let sessionHistort = [];
-    // let session = this.userModel.startSession(); // It store the session object
-    // (await session).startTransaction({
-    //   readConcern: { level: 'snapshot' },
-    //   writeConcern: { w: 'majority' },
-    // });
-    // // let allBooks =  this.bookModel.findById({userid} , {session});
-    // let allBooks = await this.bookModel.find({ userid }).session(session);
-    // (await session).commitTransaction();
-    // return { allBooks };
+  async startTranscation(){
+    return await this.bookModel.db.startSession();
   }
 
   // Particuar User Books
-  async findAll(userid) {
-    const booksData = await this.userModel.findById(userid).populate('books');
-    return booksData;
+  async getUserBooks(userid) {
+    const userBook = await this.userModel.findById(userid).populate('books');
+    return userBook;
+  }
+
+  // Get all books
+  async getAllBooks(){
+    const allBooks = await this.bookModel.find();
+    return allBooks;
   }
 
   async findOne(id: number) {
@@ -72,11 +99,20 @@ export class BooksService {
     return ParticularBook;
   }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
-    return `This action updates a #${id} book`;
+  async update(_id: number, updateBookDto: UpdateBookDto) {
+    console.log({_id} , {updateBookDto})
+    const update = await this.bookModel.findByIdAndUpdate(
+      _id,
+      updateBookDto,
+      {new : true}
+    )
+    const data = await
+    console.log("Updated Successfully");
+    return update;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} book`;
+  async delete(_id){
+    await this.bookModel.findByIdAndDelete(_id);
+    return "Book Deleted"
   }
 }

@@ -22,9 +22,8 @@ export class PostsService {
     email,
     image: Express.Multer.File,
   ) {
-    // First Create to Date Object .
+    // Creating an Date Object.
     const date = new Date(createPostDto.scheduleDateAndTime).getTime();
-    //createPostDto.scheduleDateAndTime = date.toString();
     createPostDto.scheduleDateAndTime = date;
     const post = new this.postModel({
       ...createPostDto,
@@ -32,7 +31,7 @@ export class PostsService {
       email: email,
       imagePath: image.path,
     });
-    // For Users Table
+    // Updating Users Collections.
     await this.userModel.updateOne(
       { email: email },
       { $push: { posts: post._id } },
@@ -41,8 +40,9 @@ export class PostsService {
     return post.save();
   }
 
-  // For Cron Job
+  // Cron Job
   // Cron Run Every Second , 300000 : 5 minutes , 1000 : 1sec
+
   @Cron('45 * * * * *')
   async getPosts() {
     const date_obj = Date.now();

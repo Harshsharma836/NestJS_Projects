@@ -8,9 +8,11 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { FriendsModule } from './friends/friends.module';
 import { friendsMiddleware } from './friends/friends.middleware';
 import { BooksModule } from './books/books.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
+    EmailModule,
     AuthModule,
     UsersModule,
     PostsModule,
@@ -21,6 +23,9 @@ import { BooksModule } from './books/books.module';
     ScheduleModule.forRoot(),
     ConfigModule.forRoot(),
     FriendsModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
   controllers: [],
   providers: [],
