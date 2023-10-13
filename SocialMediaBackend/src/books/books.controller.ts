@@ -13,7 +13,6 @@ import {
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { title } from 'process';
 import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
@@ -24,6 +23,7 @@ export class BooksController {
   @UseGuards(AuthGuard)
   create(@Body() createBookDto: CreateBookDto, @Req() req) {
     const userId = req.user.userid;
+    // const createdEntry = new this.exampleModel({ value1, value2 });
     return this.booksService.create(createBookDto, userId);
   }
 

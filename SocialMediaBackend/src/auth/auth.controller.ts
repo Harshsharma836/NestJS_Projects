@@ -1,7 +1,6 @@
-import { Controller, Post, Body, Param, Get, Req } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { ForgotPasswordDto } from './dto/forgot_password.dto';
 import { VerifyOtpDTO } from './dto/verify_otp.dto';
 
 @Controller('auth')
@@ -18,12 +17,11 @@ export class AuthController {
     return this.authService.registerIn(createAuthDto);
   }
 
+  // For Sending Otp
   @Post('forgotpassword/:email')
-  async sendEmailPassword(@Param('email') email : string) {
+  async sendEmailPassword(@Param('email') email: string) {
     try {
-      let isEmailSend = await this.authService.sendEmailForgotPassword(
-      email,
-      );
+      const isEmailSend = await this.authService.sendEmailForgotPassword(email);
       if (isEmailSend != null) {
         return isEmailSend;
       } else {
@@ -34,10 +32,10 @@ export class AuthController {
     }
   }
 
-  // For Ferify the User.
+  // For Verifying the User.
   @Get('verifypassword')
-  async verifyUser(@Body() verifyOtpDTO : VerifyOtpDTO  ){
-    let isValid = await this.authService.verifyOtp(verifyOtpDTO);
-    return isValid
+  async verifyUser(@Body() verifyOtpDTO: VerifyOtpDTO) {
+    const isValid = await this.authService.verifyOtp(verifyOtpDTO);
+    return isValid;
   }
 }

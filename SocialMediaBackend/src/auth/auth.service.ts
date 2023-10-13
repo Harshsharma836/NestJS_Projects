@@ -1,7 +1,7 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './user.schema';
+import { User } from './Schema/user.schema';
 import { Model } from 'mongoose';
-import * as nodemailer from 'nodemailer'
+import * as nodemailer from 'nodemailer';
 
 import {
   HttpException,
@@ -10,9 +10,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { ForgotPassword } from './forgot.password.schema';
-import { ForgotPasswordDto } from './dto/forgot_password.dto';
+import { ForgotPassword } from './Schema/forgot.password.schema';
 import { VerifyOtpDTO } from './dto/verify_otp.dto';
 
 @Injectable()
@@ -20,7 +18,8 @@ export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
-    @InjectModel(ForgotPassword.name) private forgotPasswordModel : Model<ForgotPassword>
+    @InjectModel(ForgotPassword.name)
+    private forgotPasswordModel: Model<ForgotPassword>,
   ) {}
 
   async signIn(email, pass) {
@@ -53,34 +52,35 @@ export class AuthService {
   // Forgot Password via Email
 
   async sendEmailForgotPassword(email: string) {
-    let user = await this.userModel.findOne({email : email});
-    if(!user){
-      throw new HttpException("LOGIN.USER_NOT_FOUND" , HttpStatus.NOT_FOUND);
+    const user = await this.userModel.findOne({ email: email });
+    if (!user) {
+      throw new HttpException('LOGIN.USER_NOT_FOUND', HttpStatus.NOT_FOUND);
     }
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'harshsharma72001@gmail.com',
-          pass: 'xppf haho tdnz kuyk ',
-        },
+      service: 'gmail',
+      auth: {
+        user: 'harshsharma72001@gmail.com',
+        pass: 'xppf haho tdnz kuyk ',
+      },
     });
 
-    let time = Date.now();
-    let otpExpireTime = Date.now()+300000 ; // for minutes extra
+    // for Extra 5 minutes Validation , We can also use it by CreatedAt
+    const otpExpireTime = Date.now() + 300000;
     // 8 digit Otp
-    let otp = Math.floor(Math.random() * 10000000) + 1;
-      // Define the email options
-  
-      const mailOptions = {
+    const otp = Math.floor(Math.random() * 10000000) + 1;
+
+    // Define the email options
+    const mailOptions = {
       from: 'harshsharma72001@gmail.com',
       to: email,
       subject: 'Forgot Password',
-      text : `OTP is ${otp} , It is valid for only 5 Min` ,
+      text: `OTP is ${otp} , It is valid for only 5 Min`,
     };
-    let data = {otp : otp , email : email , otpExpireTime : otpExpireTime};
+
+    const data = { otp: otp, email: email, otpExpireTime: otpExpireTime };
     await this.forgotPasswordModel.create(data);
 
-      // Send the email
+    // Send the email
     try {
       await transporter.sendMail(mailOptions);
       return 'Email sent successfully!';
@@ -89,28 +89,26 @@ export class AuthService {
     }
   }
 
-  async verifyOtp( verifyOtpDTO : VerifyOtpDTO  ){
-      let date = Date.now();
-      if( !verifyOtpDTO.email || !verifyOtpDTO.otp || !verifyOtpDTO.email){
-        return "Enter OTP";
-      }
-      // Sorting the data based on CreatedAt.
-      let forgotPassword = await this.forgotPasswordModel.findOne({ email: verifyOtpDTO.email })
+  async verifyOtp(verifyOtpDTO: VerifyOtpDTO) {
+    const date = Date.now();
+    if (!verifyOtpDTO.email || !verifyOtpDTO.otp || !verifyOtpDTO.email) {
+      return 'Enter OTP';
+    }
+    // Sorting the data based on CreatedAt.
+    const forgotPassword = await this.forgotPasswordModel
+      .findOne({ email: verifyOtpDTO.email })
       .sort({ createdAt: -1 });
 
-      if(forgotPassword.otp != verifyOtpDTO.otp){
-          return "OTP is Not Valid";
-      }
-      if(date > forgotPassword.otpExpireTime) return "OTP is Expired";
-      
-      // All things are valid now so update the password
+    if (forgotPassword.otp != verifyOtpDTO.otp) {
+      return 'OTP is Not Valid';
+    }
+    if (date > forgotPassword.otpExpireTime) return 'OTP is Expired';
 
-      const updateUser = await this.userModel.updateOne(
-        { email: verifyOtpDTO.email },
-        { $set: { password: verifyOtpDTO.password}}
-      );
-      return "Password Updated Successfully";
-      
-      // let data = await this.forgotPasswordModel.findOne({email:forgotPasswordDto.gmail})
+    // All things are valid now so update the password
+    await this.userModel.updateOne(
+      { email: verifyOtpDTO.email },
+      { $set: { password: verifyOtpDTO.password } },
+    );
+    return 'Password Updated Successfully';
   }
 }

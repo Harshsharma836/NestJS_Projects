@@ -1,9 +1,7 @@
-// Friends Services are Not Completed its on Working .
-
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from 'src/auth/user.schema';
+import { User } from 'src/auth/Schema/user.schema';
 
 @Injectable()
 export class FriendsService {

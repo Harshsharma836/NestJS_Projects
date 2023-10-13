@@ -4,7 +4,7 @@ import { PostsController } from './posts.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PostSchema, Posts } from './post.schema';
 import { MulterModule } from '@nestjs/platform-express';
-import { User, UserSchema } from 'src/auth/user.schema';
+import { User, UserSchema } from 'src/auth/Schema/user.schema';
 import { UsersService } from 'src/users/users.service';
 
 @Module({
