@@ -4,16 +4,17 @@ import { FileController } from './file.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { File, FileSchema } from './Schema/file.schema';
 import { MulterModule } from '@nestjs/platform-express';
+import { EmailService } from 'src/email/email.service';
 
 @Module({
-  imports : [ MongooseModule.forFeature([{ name: File.name, schema: FileSchema }]),
+  imports: [
+    MongooseModule.forFeature([{ name: File.name, schema: FileSchema }]),
 
-  MulterModule.register({
-    dest: './uploads', // Define the upload directory
-  }),
-
-],
+    MulterModule.register({
+      dest: './uploads', // Define the upload directory
+    }),
+  ],
   controllers: [FileController],
-  providers: [FileService ],
+  providers: [FileService, EmailService],
 })
 export class FileModule {}

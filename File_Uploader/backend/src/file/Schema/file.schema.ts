@@ -9,6 +9,15 @@ export class File extends Document {
 
   @Prop()
   path: string;
+
+  @Prop()
+  email: string;
+
+  @Prop()
+  Otp: number;
+
+  @Prop()
+  otpExpiry: number;
 }
 
 export const FileSchema = SchemaFactory.createForClass(File);
