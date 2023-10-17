@@ -29,16 +29,17 @@ export class FileController {
         validators: [new FileTypeValidator({ fileType: 'image' })],
       }),
     )
-    file,
+    file: Express.Multer.File,
+    @Body('secure') secure: boolean,
     @Req() req,
   ) {
-    return this.fileService.create(file, req.user.username);
+    return this.fileService.create(file, req.user.username, secure);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('files')
-  getFiles() {
-    return this.fileService.getFiles();
+  @Get('allfiles')
+  async getAllFiles() {
+    return await this.fileService.getUserWithFiles();
   }
 
   @UseGuards(JwtAuthGuard)
@@ -55,7 +56,7 @@ export class FileController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('files/:id')
-  deleteFile(@Param('id') id: string) {
-    return this.fileService.deleteFile(id);
+  deleteFile(@Param('id') id: string, @Req() req) {
+    return this.fileService.deleteFile(id, req.user.username);
   }
 }

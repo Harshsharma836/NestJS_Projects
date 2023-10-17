@@ -12,9 +12,9 @@ async function bootstrap() {
   app.enableCors();
 
   // Serve static files from the 'uploads' directory
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads', // Set the prefix for the static files
-  });
+  // app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  //   prefix: '/uploads', // Set the prefix for the static files
+  // });
 
   await app.listen(4001);
 }

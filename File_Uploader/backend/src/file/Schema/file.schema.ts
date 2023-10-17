@@ -18,6 +18,9 @@ export class File extends Document {
 
   @Prop()
   otpExpiry: number;
+
+  @Prop()
+  secure: boolean;
 }
 
 export const FileSchema = SchemaFactory.createForClass(File);

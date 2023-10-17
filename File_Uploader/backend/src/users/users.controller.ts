@@ -8,17 +8,18 @@ export class UsersController {
 
   @Post('/signup')
   async createUser(
-    @Body('password') password: string,
+    @Body('fullName') fullName: string,
     @Body('username') username: string,
+    @Body('password') password: string,
   ) {
-    if (username === undefined || password === undefined) {
+    if (fullName === undefined || username === undefined || password === undefined) {
       return 'Please Enter Username and Password';
     }
     const salt = 10;
     const user = await this.userService.getUser({ username });
     if (user) return 'User Already Exists';
     const hashedPassword = await bcrypt.hash(password, salt);
-    const result = await this.userService.createUser(username, hashedPassword);
+    const result = await this.userService.createUser(fullName , username, hashedPassword );
     return result;
   }
 }

@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as nodemailer from 'nodemailer';
-import { File } from 'src/file/Schema/file.schema';
 
 @Injectable()
 export class EmailService {
-  constructor(@InjectModel(File.name) private fileModel: Model<File>) {}
-
-  async sendEmail(email: string, id): Promise<string> {
+  async sendEmail(email: string, id, Otp): Promise<string> {
     // Configure nodemailer with your email service provider
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -17,20 +12,6 @@ export class EmailService {
         pass: process.env.pass,
       },
     });
-
-    const otpExpireTime = Date.now();
-
-    const fileData = await this.fileModel.findById(id);
-    let Otp = fileData.Otp;
-    if (otpExpireTime > fileData.otpExpiry) {
-      Otp = Math.floor(Math.random() * 10000000) + 1;
-      const updateExpireTime = Date.now() + 300000;
-      await this.fileModel.findByIdAndUpdate(
-        { _id: id },
-        { $set: { Otp: Otp, otpExpiry: updateExpireTime } },
-        { new: true },
-      );
-    }
 
     // Define the email options
     const mailOptions = {

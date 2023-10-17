@@ -6,10 +6,10 @@ import { FileUser } from './users.model';
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(FileUser.name) private userModel: Model<FileUser>) {}
-
-  async createUser(username: string, password: string): Promise<FileUser> {
+  async createUser(fullName : string , username: string, password: string): Promise<FileUser> {
     const user = await this.userModel.create({
       username: username,
+      fullName : fullName,
       password: password,
     });
     return user;
