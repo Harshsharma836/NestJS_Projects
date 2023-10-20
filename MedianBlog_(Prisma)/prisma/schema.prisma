@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Article{
+  id Int  @id @default(autoincrement())  // @id Primary key for model
+  title String @unique
+  description String?
+  body String
+  published Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAT DateTime @updatedAt
+  author User @relation(fields: [authorId] , references: [id] , onDelete: Cascade , onUpdate: Cascade)
+  authorId Int  // Foriegn Key .
+
+  @@unique([id , authorId]) // composite key 1 2
+}
+// The authorId column in the Article table references the id column in the User table.
+
+model User{
+  id Int @id @default(autoincrement()) // Primary Key
+  name String
+  email String @unique
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  articles Article[]
+  profile Profile?
+}
+// The profileId column in the Profile table references the id column in the User table.
+// It is one to one relation .
+
+model Profile{
+  id Int @id @default(autoincrement()) // Primary Key
+  user User @relation(fields: [profileId] , references: [id] , onDelete: Cascade , onUpdate: Cascade)
+  profileId Int @unique // Foreign Key for User 
+  firstName String
+  lastName String
+  address String
+  gender String
+}
+
+
+
+
+
+
+
+
