@@ -7,6 +7,9 @@ I developed a Advanced Social Media Backend using JavaScript, Node.js, NestJS an
 View the Collection on Postman for Specific Routes : 
 https://planetary-firefly-68128.postman.co/workspace/New-Team-Workspace~e7c4518a-1cc1-403e-a689-e4ab0470a104/collection/
 
+### database-schema diagram
+![Untitled (7)](https://github.com/Harshsharma836/NestJS_Projects/assets/70514943/01fc7f55-0c0d-4fee-883d-a663fb6ed3aa)
+
 ### MongoDB Atlas Schema
 
 #### User Collection
