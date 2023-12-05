@@ -1,39 +1,43 @@
-import { SubscribeMessage, MessageBody, ConnectedSocket, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer, OnGatewayInit } from '@nestjs/websockets';
+// src/chat/chat.gateway.ts
+import { SubscribeMessage, MessageBody, ConnectedSocket, WebSocketGateway, OnGatewayConnection, WebSocketServer, OnGatewayInit } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import _ from 'lodash';
-import * as WebSocket from 'ws';
-import { SocketType } from './socket.type';
-import { WebSocketAdapter , INestApplication } from '@nestjs/common';
-// import {SocketType} from '~core/type/socket/socket.type'
+import { AuthService } from '../auth/auth.service';
 
 @WebSocketGateway()
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect , OnGatewayInit{
+export class ChatGateway implements OnGatewayConnection, OnGatewayInit {
   @WebSocketServer()
   server: Server;
 
+  constructor(private readonly authService: AuthService) {}
+
   afterInit(server: Server) {
-    Logger.log("Intilize")
+    Logger.log('Initialized');
   }
 
   handleConnection(client: Socket) {
-      Logger.log(`Client Connected ${client.client}`)
+    Logger.log(`Client Connected ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    // Handle disconnection event
-    Logger.log(`Client Disconnected ${client.client}`)
+    Logger.log(`Client Disconnected ${client.id}`);
   }
 
-  @SubscribeMessage('message')
-  handleMessage(@MessageBody() data: string, @ConnectedSocket() client: Socket ) {
-    console.log(client.handshake.query);
+  @SubscribeMessage('personalMessage')
+  handlePersonalMessage(
+    @MessageBody() data: { to: string; message: string },
+    @ConnectedSocket() sender: Socket,
+  ) {
+    const { to, message } = data;
 
-    //const token = _.get(client.handshake.query , 'token' , 'default');
-    const token = client.handshake.query.token;
-    // extract user from token
-    console.log(token);
-    this.server.emit('message', data); // Broadcast messag to all connected clients
+    // Ensure the recipient is authenticated
+    const recipient = this.server.sockets.sockets[to];
+
+    if (recipient && this.authService.isSocketAuthenticated(recipient)) {
+      recipient.emit('personalMessage', { from: sender.id, message });
+    } else {
+      sender.emit('personalMessageError', { to, message: 'User is not connected or not authenticated' });
+    }
   }
 }

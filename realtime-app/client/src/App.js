@@ -1,13 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
-import Chat from './components/chat';
+// src/App.jsx
+import React, { useState } from 'react';
+import LoginPage from './components/login.page';
+import ChatPage from './components/chat.page';
 
-function App() {
+const App = () => {
+  const [token, setToken] = useState('');
+
+  const handleLogin = (token) => {
+    setToken(token);
+  };
+
   return (
-    <div className="App">
-      <Chat></Chat>
+    <div>
+      {!token ? (
+        <LoginPage onLogin={handleLogin} />
+      ) : (
+        <ChatPage token={token} />
+      )}
     </div>
   );
-}
+};
 
 export default App;

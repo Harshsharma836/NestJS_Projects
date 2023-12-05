@@ -17,21 +17,29 @@ const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 const socket_io_2 = require("socket.io");
 const common_1 = require("@nestjs/common");
+const auth_service_1 = require("../auth/auth.service");
 let ChatGateway = class ChatGateway {
+    constructor(authService) {
+        this.authService = authService;
+    }
     afterInit(server) {
-        common_1.Logger.log("Intilize");
+        common_1.Logger.log('Initialized');
     }
     handleConnection(client) {
-        common_1.Logger.log(`Client Connected ${client.client}`);
+        common_1.Logger.log(`Client Connected ${client.id}`);
     }
     handleDisconnect(client) {
-        common_1.Logger.log(`Client Disconnected ${client.client}`);
+        common_1.Logger.log(`Client Disconnected ${client.id}`);
     }
-    handleMessage(data, client) {
-        console.log(client.handshake.query);
-        const token = client.handshake.query.token;
-        console.log(token);
-        this.server.emit('message', data);
+    handlePersonalMessage(data, sender) {
+        const { to, message } = data;
+        const recipient = this.server.sockets.sockets[to];
+        if (recipient && this.authService.isSocketAuthenticated(recipient)) {
+            recipient.emit('personalMessage', { from: sender.id, message });
+        }
+        else {
+            sender.emit('personalMessageError', { to, message: 'User is not connected or not authenticated' });
+        }
     }
 };
 exports.ChatGateway = ChatGateway;
@@ -40,14 +48,15 @@ __decorate([
     __metadata("design:type", socket_io_1.Server)
 ], ChatGateway.prototype, "server", void 0);
 __decorate([
-    (0, websockets_1.SubscribeMessage)('message'),
+    (0, websockets_1.SubscribeMessage)('personalMessage'),
     __param(0, (0, websockets_1.MessageBody)()),
     __param(1, (0, websockets_1.ConnectedSocket)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, socket_io_2.Socket]),
+    __metadata("design:paramtypes", [Object, socket_io_2.Socket]),
     __metadata("design:returntype", void 0)
-], ChatGateway.prototype, "handleMessage", null);
+], ChatGateway.prototype, "handlePersonalMessage", null);
 exports.ChatGateway = ChatGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)()
+    (0, websockets_1.WebSocketGateway)(),
+    __metadata("design:paramtypes", [auth_service_1.AuthService])
 ], ChatGateway);
 //# sourceMappingURL=chat.gateway.js.map
